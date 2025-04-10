@@ -2,13 +2,12 @@
 import React from "react";
 import ProductCard from "./ProductCard";
 
-const ProductList = ({ products = [], category = "All", onAddToCart }) => {
-  const filteredProducts =
-    category.toLowerCase() === "all"
-      ? products
-      : products.filter(
-          (product) => product.category.toLowerCase() === category.toLowerCase()
-        );
+const ProductList = ({ products = [], category, onAddToCart }) => {
+  const filteredProducts = category
+    ? products.filter(
+        (product) => product.category.toLowerCase() === category.toLowerCase()
+      )
+    : products;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
@@ -17,7 +16,9 @@ const ProductList = ({ products = [], category = "All", onAddToCart }) => {
           <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
         ))
       ) : (
-        <div className="text-gray-500 col-span-full text-center">No products found.</div>
+        <p className="text-gray-700 dark:text-white col-span-full text-center">
+          No products found in this category.
+        </p>
       )}
     </div>
   );

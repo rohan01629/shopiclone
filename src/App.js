@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+// src/App.js
+import React, { useEffect, useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ProductList from './components/ProductList';
 import CartItem from './components/CartItem';
@@ -9,21 +11,20 @@ function App() {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [products, setProducts] = useState([]);
 
-  // 🛒 Fetch products from API
   useEffect(() => {
+    // Fetch product data from API
     const fetchProducts = async () => {
       try {
-        const res = await fetch('https://fakestoreapi.com/products');
+        const res = await fetch("https://fakestoreapi.com/products");
         const data = await res.json();
         setProducts(data);
       } catch (error) {
-        console.error('Error fetching products:', error);
-        toast.error('Failed to load products');
+        console.error("Error fetching products:", error);
       }
     };
+
     fetchProducts();
   }, []);
 
@@ -79,14 +80,11 @@ function App() {
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <Navbar
-        cartCount={cart.length}
-        onCartClick={() => setIsCartOpen(!isCartOpen)}
-        onCategoryChange={(category) => setSelectedCategory(category)}
-      />
+      <Navbar cartCount={cart.length} onCartClick={() => setIsCartOpen(!isCartOpen)} />
       <ToastContainer position="top-right" autoClose={2000} theme="colored" />
 
       <main className="p-6">
+        {/* Cart Drawer */}
         {isCartOpen && (
           <div className="fixed top-0 right-0 w-full sm:w-96 h-full bg-white dark:bg-gray-800 shadow-lg z-50 overflow-y-auto transition-transform transform translate-x-0">
             <div className="p-6 flex justify-between items-center border-b dark:border-gray-700">
@@ -125,6 +123,7 @@ function App() {
           </div>
         )}
 
+        {/* Orders */}
         {orders.length > 0 && (
           <div className="mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md max-w-3xl mx-auto">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">My Orders</h2>
@@ -144,11 +143,14 @@ function App() {
           </div>
         )}
 
-        <ProductList
-          products={products}
-          category={selectedCategory}
-          onAddToCart={handleAddToCart}
-        />
+        {/* Routes for filtered product views */}
+        <Routes>
+          <Route path="/" element={<ProductList products={products} onAddToCart={handleAddToCart} />} />
+          <Route path="/clothes" element={<ProductList products={products} category="men's clothing" onAddToCart={handleAddToCart} />} />
+          <Route path="/electronics" element={<ProductList products={products} category="electronics" onAddToCart={handleAddToCart} />} />
+          <Route path="/furniture" element={<ProductList products={products} category="jewelery" onAddToCart={handleAddToCart} />} />
+          <Route path="/toys" element={<ProductList products={products} category="women's clothing" onAddToCart={handleAddToCart} />} />
+        </Routes>
       </main>
     </div>
   );
