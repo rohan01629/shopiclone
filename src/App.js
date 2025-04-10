@@ -1,20 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProductList from "./components/ProductList";
-import CartItem from "./components/CartItem";
+import Cart from "./components/Cart"; 
+import Orders from "./components/Orders";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { auth } from "./firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import Login from "./components/Login";
+import Signup from "./components/Signup"; 
 
 function App() {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [products, setProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // Store the search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");  // Track selected category
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Fetch product data from API
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("https://fakestoreapi.com/products");
@@ -24,7 +40,6 @@ function App() {
         console.error("Error fetching products:", error);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -41,26 +56,29 @@ function App() {
         return [...prevCart, { ...product, quantity: 1 }];
       }
     });
-    setIsCartOpen(true);
   };
 
-  const handleIncrease = (id) => {
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: item.quantity + 1 } : item))
-    );
+  const handleCheckout = (items) => {
+    setOrders((prevOrders) => [...prevOrders, { id: Date.now(), items }]);
+    setCart([]); 
+    toast.success("Order placed!");
   };
 
-  const handleDecrease = (id) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id && item.quantity > 1
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
+  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  const handleSearch = (query) => {
+    setSearchQuery(query.toLowerCase());
   };
+
+  // Filter products based on category and search query
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.title.toLowerCase().includes(searchQuery);
+    const matchesCategory =
+      selectedCategory === "all" ||
+      product.category.toLowerCase() === selectedCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
 
   const handleRemoveFromCart = (id) => {
     const removedItem = cart.find((item) => item.id === id);
@@ -68,94 +86,57 @@ function App() {
     setCart((prevCart) => prevCart.filter((item) => item.id !== id));
   };
 
-  const handleCheckout = () => {
-    if (cart.length === 0) return;
-    setOrders((prevOrders) => [...prevOrders, { id: Date.now(), items: cart }]);
-    setCart([]);
-    toast.success("Order placed!");
-    setIsCartOpen(false);
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        toast.success("Logged out successfully!");
+      })
+      .catch((error) => {
+        toast.error("Error logging out!");
+      });
   };
-
-  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-
-  // Handle search query
-  const handleSearch = (query) => {
-    setSearchQuery(query.toLowerCase());
-  };
-
-  // Filter products based on category and search query
-  const filteredProducts = products.filter((product) => {
-    if (searchQuery && !product.title.toLowerCase().includes(searchQuery)) {
-      return false;
-    }
-    return true;
-  });
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <Navbar cartCount={cart.length} onSearch={handleSearch} />
+      <Navbar
+        cartCount={cart.length}
+        ordersCount={orders.length}
+        onSearch={handleSearch}
+        user={user}
+        onLogout={handleLogout}
+        setSelectedCategory={setSelectedCategory} // Pass down the function to set the category
+      />
       <ToastContainer position="top-right" autoClose={2000} theme="colored" />
       <main className="p-6">
-        {/* Cart Drawer */}
-        {isCartOpen && (
-          <div className="fixed top-0 right-0 w-full sm:w-96 h-full bg-white dark:bg-gray-800 shadow-lg z-50 overflow-y-auto transition-transform transform translate-x-0">
-            <div className="p-6 flex justify-between items-center border-b dark:border-gray-700">
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Your Cart</h2>
-              <button onClick={() => setIsCartOpen(false)} className="text-gray-500 hover:text-gray-800 dark:hover:text-white">&times;</button>
-            </div>
-            <div className="p-6">
-              {cart.length === 0 ? (
-                <p className="text-gray-600 dark:text-gray-400">Your cart is empty.</p>
-              ) : (
-                <>
-                  {cart.map((item) => (
-                    <CartItem
-                      key={item.id}
-                      item={item}
-                      onRemoveFromCart={handleRemoveFromCart}
-                      onIncrease={handleIncrease}
-                      onDecrease={handleDecrease}
-                    />
-                  ))}
-                  <div className="flex justify-between mt-4 border-t pt-4">
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">Total:</span>
-                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                      ${cartTotal.toFixed(2)}
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleCheckout}
-                    className="w-full mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                  >
-                    Checkout
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Routes for filtered product views */}
         <Routes>
           <Route
             path="/"
             element={<ProductList products={filteredProducts} onAddToCart={handleAddToCart} />}
           />
           <Route
+            path="/cart"
+            element={<Cart cartItems={cart} setCartItems={setCart} handleCheckout={handleCheckout} />}
+          />
+          <Route path="/orders" element={<Orders orders={orders} />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          
+          {/* Specific routes for categories */}
+          <Route
             path="/clothes"
-            element={<ProductList products={filteredProducts.filter((product) => product.category === "men's clothing")} onAddToCart={handleAddToCart} />}
+            element={<ProductList products={filteredProducts.filter(product => product.category === "men's clothing")} onAddToCart={handleAddToCart} />}
           />
           <Route
             path="/electronics"
-            element={<ProductList products={filteredProducts.filter((product) => product.category === "electronics")} onAddToCart={handleAddToCart} />}
+            element={<ProductList products={filteredProducts.filter(product => product.category === "electronics")} onAddToCart={handleAddToCart} />}
           />
           <Route
             path="/jewelery"
-            element={<ProductList products={filteredProducts.filter((product) => product.category === "jewelery")} onAddToCart={handleAddToCart} />}
+            element={<ProductList products={filteredProducts.filter(product => product.category === "jewelery")} onAddToCart={handleAddToCart} />}
           />
           <Route
-            path="/women's clothing"
-            element={<ProductList products={filteredProducts.filter((product) => product.category === "women's clothing")} onAddToCart={handleAddToCart} />}
+            path="/womens-clothing"
+            element={<ProductList products={filteredProducts.filter(product => product.category === "women's clothing")} onAddToCart={handleAddToCart} />}
           />
         </Routes>
       </main>
