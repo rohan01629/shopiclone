@@ -1,17 +1,17 @@
-// src/App.js
-import React, { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import ProductList from './components/ProductList';
-import CartItem from './components/CartItem';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import ProductList from "./components/ProductList";
+import CartItem from "./components/CartItem";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // Store the search query
 
   useEffect(() => {
     // Fetch product data from API
@@ -78,11 +78,23 @@ function App() {
 
   const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
+  // Handle search query
+  const handleSearch = (query) => {
+    setSearchQuery(query.toLowerCase());
+  };
+
+  // Filter products based on category and search query
+  const filteredProducts = products.filter((product) => {
+    if (searchQuery && !product.title.toLowerCase().includes(searchQuery)) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <Navbar cartCount={cart.length} onCartClick={() => setIsCartOpen(!isCartOpen)} />
+      <Navbar cartCount={cart.length} onSearch={handleSearch} />
       <ToastContainer position="top-right" autoClose={2000} theme="colored" />
-
       <main className="p-6">
         {/* Cart Drawer */}
         {isCartOpen && (
@@ -123,33 +135,28 @@ function App() {
           </div>
         )}
 
-        {/* Orders */}
-        {orders.length > 0 && (
-          <div className="mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md max-w-3xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">My Orders</h2>
-            {orders.map((order) => (
-              <div key={order.id} className="border-t pt-4 mb-4">
-                <h3 className="text-lg font-bold mb-2 text-gray-700 dark:text-white">
-                  Order #{order.id}
-                </h3>
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
-                    <span>{item.title} x {item.quantity}</span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Routes for filtered product views */}
         <Routes>
-          <Route path="/" element={<ProductList products={products} onAddToCart={handleAddToCart} />} />
-          <Route path="/clothes" element={<ProductList products={products} category="men's clothing" onAddToCart={handleAddToCart} />} />
-          <Route path="/electronics" element={<ProductList products={products} category="electronics" onAddToCart={handleAddToCart} />} />
-          <Route path="/furniture" element={<ProductList products={products} category="jewelery" onAddToCart={handleAddToCart} />} />
-          <Route path="/toys" element={<ProductList products={products} category="women's clothing" onAddToCart={handleAddToCart} />} />
+          <Route
+            path="/"
+            element={<ProductList products={filteredProducts} onAddToCart={handleAddToCart} />}
+          />
+          <Route
+            path="/clothes"
+            element={<ProductList products={filteredProducts.filter((product) => product.category === "men's clothing")} onAddToCart={handleAddToCart} />}
+          />
+          <Route
+            path="/electronics"
+            element={<ProductList products={filteredProducts.filter((product) => product.category === "electronics")} onAddToCart={handleAddToCart} />}
+          />
+          <Route
+            path="/jewelery"
+            element={<ProductList products={filteredProducts.filter((product) => product.category === "jewelery")} onAddToCart={handleAddToCart} />}
+          />
+          <Route
+            path="/women's clothing"
+            element={<ProductList products={filteredProducts.filter((product) => product.category === "women's clothing")} onAddToCart={handleAddToCart} />}
+          />
         </Routes>
       </main>
     </div>

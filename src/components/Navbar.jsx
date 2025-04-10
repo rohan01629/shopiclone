@@ -1,10 +1,18 @@
-import React, { useContext, useState } from "react";
+// src/components/Navbar.jsx
+import React, { useState, useContext } from "react"; // Added useContext import
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/cartContext.jsx";
 
-const Navbar = () => {
-  const { cartItems } = useContext(CartContext);
+const Navbar = ({ onSearch }) => { // onSearch function passed as a prop
+  const { cartItems } = useContext(CartContext); // Using useContext to get cartItems
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // State to handle search query
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    onSearch(e.target.value); // Call the onSearch function passed from the parent (App.js)
+  };
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -22,27 +30,22 @@ const Navbar = () => {
 
           <ul className="hidden md:flex space-x-6 font-medium">
             <li><Link to="/" className="text-blue-700 dark:text-blue-500 hover:underline">All</Link></li>
-            <li><Link to="/clothes" className="text-gray-900 dark:text-white hover:underline">Clothes</Link></li>
+            <li><Link to="/clothes" className="text-gray-900 dark:text-white hover:underline">Men's</Link></li>
             <li><Link to="/Electronics" className="text-gray-900 dark:text-white hover:underline">Electronics</Link></li>
-            <li><Link to="/Furniture" className="text-gray-900 dark:text-white hover:underline">Furniture</Link></li>
-            <li><Link to="/Toys" className="text-gray-900 dark:text-white hover:underline">Toys</Link></li>
+            <li><Link to="/jewelery" className="text-gray-900 dark:text-white hover:underline">Jewelery</Link></li>
+            <li><Link to="/Women's Clothing" className="text-gray-900 dark:text-white hover:underline">Women's Clothing</Link></li>
           </ul>
         </div>
 
-        {/* Mobile menu button */}
-        <div className="md:hidden">
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            type="button"
-            className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-            aria-controls="mobile-menu"
-            aria-expanded={isMobileMenuOpen}
-          >
-            <span className="sr-only">Open main menu</span>
-            <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15"/>
-            </svg>
-          </button>
+        {/* Search bar */}
+        <div className="flex items-center w-1/3">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search products..."
+            className="w-full py-2 px-4 text-sm border border-gray-300 dark:bg-gray-700 dark:text-white rounded-lg"
+          />
         </div>
 
         {/* Right section */}
@@ -58,10 +61,10 @@ const Navbar = () => {
         <div className="md:hidden px-4 pb-4">
           <ul className="space-y-2 font-medium">
             <li><Link to="/" className="block text-blue-700">All</Link></li>
-            <li><Link to="/clothes" className="block text-gray-900 dark:text-white">Clothes</Link></li>
+            <li><Link to="/clothes" className="block text-gray-900 dark:text-white">Men's</Link></li>
             <li><Link to="/Electronics" className="block text-gray-900 dark:text-white">Electronics</Link></li>
-            <li><Link to="/Furniture" className="block text-gray-900 dark:text-white">Furniture</Link></li>
-            <li><Link to="/Toys" className="block text-gray-900 dark:text-white">Toys</Link></li>
+            <li><Link to="/jewelery" className="block text-gray-900 dark:text-white">Jewelery</Link></li>
+            <li><Link to="/Women's Clothing" className="block text-gray-900 dark:text-white">Women's Clothing</Link></li>
             <li><Link to="/cart" className="block text-gray-900 dark:text-white">Cart ({cartItems.length})</Link></li>
             <li><Link to="/login" className="block text-gray-900 dark:text-white">Login</Link></li>
             <li><Link to="/signup" className="block text-gray-900 dark:text-white">Signup</Link></li>

@@ -1,4 +1,3 @@
-// src/components/CartItem.js
 import React from 'react';
 
 const CartItem = ({ item, onRemoveFromCart, onIncrease, onDecrease }) => {

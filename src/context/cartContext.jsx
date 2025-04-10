@@ -1,6 +1,5 @@
 import React, { createContext, useState } from "react";
 
-// ✅ Correct named exports
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
