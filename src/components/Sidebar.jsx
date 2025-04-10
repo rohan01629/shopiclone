@@ -1,10 +1,10 @@
 import React from "react";
-import { FaTimes } from "react-icons/fa"; // Import the close icon (X)
+import { FaTimes } from "react-icons/fa"; 
 
 const Sidebar = ({ userInfo, onLogout, closeSidebar }) => {
   return (
     <div className="fixed top-0 right-0 w-64 h-full bg-gray-800 text-white p-6 shadow-lg z-50">
-      {/* Close button in the top-right corner */}
+   
       <button
         onClick={closeSidebar}
         className="absolute top-4 right-4 text-white text-2xl"

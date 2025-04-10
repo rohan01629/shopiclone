@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProductList from "./components/ProductList";
-import Cart from "./components/Cart"; 
+import Cart from "./components/Cart";
 import Orders from "./components/Orders";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Login from "./components/Login";
-import Signup from "./components/Signup"; 
+import Signup from "./components/Signup";
 
 function App() {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");  // Track selected category
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -25,6 +26,8 @@ function App() {
         setUser(user);
       } else {
         setUser(null);
+        // Optionally reset orders if no user is logged in
+        setOrders([]);
       }
     });
     return () => unsubscribe();
@@ -44,6 +47,12 @@ function App() {
   }, []);
 
   const handleAddToCart = (product) => {
+    if (!user) {
+      toast.error("Please log in to add items to your cart.");
+      navigate("/login");
+      return;
+    }
+
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === product.id);
       if (existingItem) {
@@ -70,7 +79,6 @@ function App() {
     setSearchQuery(query.toLowerCase());
   };
 
-  // Filter products based on category and search query
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.title.toLowerCase().includes(searchQuery);
     const matchesCategory =
@@ -89,7 +97,15 @@ function App() {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
+        // Clear cart and orders after logout
+        setCart([]);
+        setOrders([]);
+
+        // Optionally, clear localStorage if you are storing orders in it
+        localStorage.removeItem("orders");
+
         toast.success("Logged out successfully!");
+        navigate("/login"); // Redirect to login page
       })
       .catch((error) => {
         toast.error("Error logging out!");
@@ -104,7 +120,7 @@ function App() {
         onSearch={handleSearch}
         user={user}
         onLogout={handleLogout}
-        setSelectedCategory={setSelectedCategory} // Pass down the function to set the category
+        setSelectedCategory={setSelectedCategory}
       />
       <ToastContainer position="top-right" autoClose={2000} theme="colored" />
       <main className="p-6">
@@ -115,13 +131,15 @@ function App() {
           />
           <Route
             path="/cart"
-            element={<Cart cartItems={cart} setCartItems={setCart} handleCheckout={handleCheckout} />}
+            element={user ? (
+              <Cart cartItems={cart} setCartItems={setCart} handleCheckout={handleCheckout} />
+            ) : (
+              <RedirectToLogin />
+            )}
           />
           <Route path="/orders" element={<Orders orders={orders} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          
-          {/* Specific routes for categories */}
           <Route
             path="/clothes"
             element={<ProductList products={filteredProducts.filter(product => product.category === "men's clothing")} onAddToCart={handleAddToCart} />}
@@ -143,5 +161,13 @@ function App() {
     </div>
   );
 }
+
+const RedirectToLogin = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/login");
+  }, [navigate]);
+  return null;
+};
 
 export default App;

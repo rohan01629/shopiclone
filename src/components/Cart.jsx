@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // To navigate to the Orders page
+// src/components/Cart.jsx
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-// A simple cart item component to display each cart item
 const CartItem = ({ item, onRemove }) => {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-300">
       <div className="flex items-center space-x-4">
         <img
-          src={item.image} // Assuming item has an image property
+          src={item.image}
           alt={item.name}
           className="w-20 h-20 object-cover rounded-md"
         />
@@ -18,7 +18,7 @@ const CartItem = ({ item, onRemove }) => {
         </div>
       </div>
       <button
-        onClick={() => onRemove(item.id)} // Call onRemove passed from parent
+        onClick={() => onRemove(item.id)}
         className="text-red-500 hover:text-red-700"
       >
         Remove
@@ -28,20 +28,17 @@ const CartItem = ({ item, onRemove }) => {
 };
 
 const Cart = ({ cartItems, setCartItems, handleCheckout }) => {
-  // Handle removing an item from the cart
   const handleRemoveItem = (id) => {
     setCartItems(cartItems.filter(item => item.id !== id));
   };
 
-  // Calculate total price of all items in the cart
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  // Handle the checkout (this can be further expanded)
   const navigate = useNavigate();
 
   const handleProceedToCheckout = () => {
-    handleCheckout(cartItems); // Passing cart items to the parent App.js to handle the order
-    navigate('/orders'); // Navigate to the orders page after checkout
+    handleCheckout(cartItems);
+    navigate('/orders');
   };
 
   return (

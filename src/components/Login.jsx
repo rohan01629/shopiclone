@@ -17,7 +17,7 @@ const Login = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        // Fetch user info (example: display name and email)
+        
         setUserInfo({
           name: user.Name || "User",
           email: user.email,
@@ -33,8 +33,8 @@ const Login = () => {
   const handleLogout = () => {
     auth.signOut()
       .then(() => {
-        setUserInfo(null); // Reset user info on logout
-        navigate("/login"); // Redirect to login page
+        setUserInfo(null); 
+        navigate("/login"); 
       })
       .catch((error) => {
         setError("Error logging out!");

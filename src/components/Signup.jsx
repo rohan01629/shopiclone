@@ -1,4 +1,3 @@
-// src/components/Signup.jsx
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
@@ -7,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [reEnterPassword, setReEnterPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -17,25 +16,16 @@ const Signup = () => {
   const handleSignup = (e) => {
     e.preventDefault();
 
-    // Create the user with Firebase Authentication
+    // Check if passwords match
+    if (password !== reEnterPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
-        // After successful signup, you can save additional info like name, phone, gender, and dob to Firebase
-        // Assuming you will store user data in Firestore or Realtime Database
-        // For example, you could use Firebase Firestore to store user details:
-
-        const userData = {
-          name,
-          phone,
-          gender,
-          dob,
-          email,
-        };
-
-        // Store user data in Firestore (assuming you have a Firestore collection for users)
-        // firebase.firestore().collection("users").doc(auth.currentUser.uid).set(userData);
-
-        navigate("/login"); // Redirect to homepage after signup
+        // Store additional data in Firestore here if necessary
+        navigate("/login");
       })
       .catch((error) => {
         setError(error.message);
@@ -49,55 +39,14 @@ const Signup = () => {
         {error && <p className="text-red-500 text-center">{error}</p>}
 
         <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-white">Name</label>
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-white">Full Name</label>
           <input
-            id="name"
+            id="fullName"
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             placeholder="Enter your full name"
-            className="w-full p-2 border border-gray-300 rounded-lg mt-2"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-white">Phone Number</label>
-          <input
-            id="phone"
-            type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Enter your phone number"
-            className="w-full p-2 border border-gray-300 rounded-lg mt-2"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-white">Gender</label>
-          <select
-            id="gender"
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-lg mt-2"
-            required
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="dob" className="block text-sm font-medium text-gray-700 dark:text-white">Date of Birth</label>
-          <input
-            id="dob"
-            type="date"
-            value={dob}
-            onChange={(e) => setDob(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-lg mt-2"
             required
           />
         </div>
@@ -109,26 +58,67 @@ const Signup = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email address"
-            className="w-full p-2 border border-gray-300 rounded-lg mt-2"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            placeholder="Enter your email"
             required
           />
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-white">Phone</label>
+          <input
+            id="phone"
+            type="text"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            placeholder="Enter your phone number"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="dob" className="block text-sm font-medium text-gray-700 dark:text-white">Date of Birth</label>
+          <input
+            id="dob"
+            type="date"
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-white">Password</label>
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create a strong password"
-            className="w-full p-2 border border-gray-300 rounded-lg mt-2"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            placeholder="Enter your password"
             required
           />
         </div>
 
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+        <div className="mb-4">
+          <label htmlFor="reEnterPassword" className="block text-sm font-medium text-gray-700 dark:text-white">Re-enter Password</label>
+          <input
+            id="reEnterPassword"
+            type="password"
+            value={reEnterPassword}
+            onChange={(e) => setReEnterPassword(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            placeholder="Re-enter your password"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
           Sign Up
         </button>
       </form>
