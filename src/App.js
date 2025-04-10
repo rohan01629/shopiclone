@@ -26,7 +26,7 @@ function App() {
         setUser(user);
       } else {
         setUser(null);
-        // Optionally reset orders if no user is logged in
+        
         setOrders([]);
       }
     });
@@ -97,15 +97,14 @@ function App() {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        // Clear cart and orders after logout
+      
         setCart([]);
         setOrders([]);
 
-        // Optionally, clear localStorage if you are storing orders in it
         localStorage.removeItem("orders");
 
         toast.success("Logged out successfully!");
-        navigate("/login"); // Redirect to login page
+        navigate("/login"); 
       })
       .catch((error) => {
         toast.error("Error logging out!");

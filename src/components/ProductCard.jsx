@@ -1,8 +1,7 @@
-// src/components/ProductCard.jsx
 import React from "react";
 
 const ProductCard = ({ product, onAddToCart }) => {
-  if (!product) return null; // 👈 Extra safety check
+  if (!product) return null; 
 
   const { title, image, price, category } = product;
 

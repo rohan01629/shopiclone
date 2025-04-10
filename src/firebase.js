@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"; // Import Firestore
+import { getFirestore } from "firebase/firestore"; 
 
-// Your Firebase config
+
 const firebaseConfig = {
     apiKey: "AIzaSyC2VCh5VEXaKXFpinUDG_NgFojZuUeLgtY",
     authDomain: "shopiclone-5852c.firebaseapp.com",
@@ -14,6 +14,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
-const db = getFirestore(app); // Initialize Firestore
+const db = getFirestore(app); 
 
-export { auth, db }; // Export both auth and db
+export { auth, db };

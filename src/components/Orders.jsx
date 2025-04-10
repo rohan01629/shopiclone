@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase"; // Import your Firebase authentication object
+import { auth } from "../firebase"; 
 import { signOut } from "firebase/auth";
 
 const Orders = ({ orders, setOrders }) => {
   const navigate = useNavigate();
 
-  // Handle user logout and clear orders
+  
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        // Clear orders when the user logs out
-        setOrders([]); // Assuming setOrders is passed as a prop to update the state
+        
+        setOrders([]); 
 
-        // Optionally, remove orders from localStorage if they're stored there
-        localStorage.removeItem("orders"); // Clear orders from local storage (if used)
+        
+        localStorage.removeItem("orders"); 
 
-        navigate("/login"); // Navigate to login page after logging out
+        navigate("/login");
       })
       .catch((error) => {
         console.error("Error during logout: ", error);

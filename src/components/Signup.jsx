@@ -24,7 +24,7 @@ const Signup = () => {
 
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
-        // Store additional data in Firestore here if necessary
+        
         navigate("/login");
       })
       .catch((error) => {

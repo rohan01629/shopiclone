@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Orders from "./Orders";
-import { auth } from "../firebase"; // Firebase auth import
+import { auth } from "../firebase"; 
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
 
-  // Fetch orders on component mount (mocked here)
+  // Fetch orders on component mount 
   useEffect(() => {
     // Fetch orders from localStorage or your database
     const savedOrders = localStorage.getItem("orders");
